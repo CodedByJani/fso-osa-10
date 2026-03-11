@@ -6,16 +6,23 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "lint": "eslint . --ext .js,.jsx"
   },
   "dependencies": {
-    "expo": "~50.0.17",
+    "expo": "^55.0.5",
     "expo-status-bar": "~1.11.1",
     "react": "18.2.0",
     "react-native": "0.73.6"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@babel/eslint-parser": "^7.28.6",
+    "babel-preset-expo": "^9.2.0",
+    "eslint": "^8.57.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-native": "^5.0.0",
+    "globals": "^17.4.0"
   },
   "private": true
 }
