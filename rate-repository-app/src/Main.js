@@ -1,5 +1,6 @@
 import { View, StyleSheet } from "react-native";
 import RepositoryList from "./components/RepositoryList";
+import AppBar from "./components/AppBar";
 
 const styles = StyleSheet.create({
   container: {
@@ -10,6 +11,7 @@ const styles = StyleSheet.create({
 const Main = () => {
   return (
     <View style={styles.container}>
+      <AppBar />
       <RepositoryList />
     </View>
   );
