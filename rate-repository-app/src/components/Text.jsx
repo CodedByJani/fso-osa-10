@@ -1,13 +1,14 @@
 import { Text as NativeText, StyleSheet } from "react-native";
+import theme from "../theme";
 
 const styles = StyleSheet.create({
   text: {
-    fontSize: 14,
+    fontFamily: theme.fonts.main,
   },
 });
 
-const Text = ({ children, style }) => {
-  return <NativeText style={[styles.text, style]}>{children}</NativeText>;
+const Text = ({ style, ...props }) => {
+  return <NativeText style={[styles.text, style]} {...props} />;
 };
 
 export default Text;
