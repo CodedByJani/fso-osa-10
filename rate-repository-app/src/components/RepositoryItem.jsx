@@ -1,12 +1,11 @@
-import { View, Text, StyleSheet, Image } from "react-native";
+import { View, StyleSheet, Image } from "react-native";
+import Text from "./Text";
 
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     padding: 15,
   },
-
-  // TOP ROW
   header: {
     flexDirection: "row",
   },
@@ -19,7 +18,6 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
   },
-
   fullName: {
     fontWeight: "bold",
     marginBottom: 5,
@@ -37,8 +35,6 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     overflow: "hidden",
   },
-
-  // STATS ROW
   stats: {
     flexDirection: "row",
     justifyContent: "space-around",
@@ -55,7 +51,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// ✅ helper function
 const formatCount = (count) => {
   if (count >= 1000) {
     return (count / 1000).toFixed(1) + "k";
@@ -66,7 +61,6 @@ const formatCount = (count) => {
 const RepositoryItem = ({ item }) => {
   return (
     <View style={styles.container}>
-      {/* TOP */}
       <View style={styles.header}>
         <Image source={{ uri: item.ownerAvatarUrl }} style={styles.avatar} />
 
@@ -77,7 +71,6 @@ const RepositoryItem = ({ item }) => {
         </View>
       </View>
 
-      {/* STATS */}
       <View style={styles.stats}>
         <View style={styles.statItem}>
           <Text style={styles.statNumber}>
