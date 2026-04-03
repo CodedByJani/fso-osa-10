@@ -9,7 +9,7 @@ const useRepositories = () => {
   const repositories = data?.repositories?.edges?.map((edge) => edge.node);
 
   return {
-    repositories,
+    repositories: data?.repositories,
     loading,
     error,
     refetch,
