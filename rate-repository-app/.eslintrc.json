@@ -7,9 +7,10 @@
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
-    "plugin:react-native/all"
+    "plugin:react-native/all",
+    "plugin:jest/recommended"
   ],
-  "plugins": ["react", "react-native"],
+  "plugins": ["react", "react-native", "jest"],
   "parser": "@babel/eslint-parser",
   "parserOptions": {
     "requireConfigFile": false,
