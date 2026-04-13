@@ -1,6 +1,7 @@
-import { FlatList, View, StyleSheet, Pressable } from "react-native";
+import React, { useState } from "react";
+import { FlatList, View, StyleSheet, Pressable, TextInput } from "react-native";
 import { useNavigate } from "react-router-native";
-import { useState } from "react";
+import { useDebounce } from "use-debounce";
 import useRepositories from "../hooks/useRepositories";
 import RepositoryItem from "./RepositoryItem";
 import Text from "./Text";
@@ -17,6 +18,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     marginBottom: 10,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+    fontSize: 14,
   },
   sortButtonContainer: {
     flexDirection: "row",
@@ -59,7 +68,7 @@ const SortingSelector = ({ sortOrder, onSortChange }) => {
   ];
 
   return (
-    <View style={styles.header}>
+    <View>
       <Text style={styles.headerTitle}>Sort by:</Text>
       <View style={styles.sortButtonContainer}>
         {sortOptions.map((option) => (
@@ -86,32 +95,46 @@ const SortingSelector = ({ sortOrder, onSortChange }) => {
   );
 };
 
-export const RepositoryListContainer = ({
-  repositories,
-  onItemPress,
-  sortOrder,
-  onSortChange,
-}) => {
-  const repositoryNodes = repositories
-    ? repositories.edges.map((edge) => edge.node)
-    : [];
+export class RepositoryListContainer extends React.Component {
+  renderHeader = () => {
+    const { sortOrder, onSortChange, searchKeyword, onSearchChange } =
+      this.props;
 
-  return (
-    <FlatList
-      data={repositoryNodes}
-      keyExtractor={(item) => item.id}
-      ItemSeparatorComponent={ItemSeparator}
-      ListHeaderComponent={
+    return (
+      <View style={styles.header}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search repositories..."
+          value={searchKeyword}
+          onChangeText={onSearchChange}
+        />
         <SortingSelector sortOrder={sortOrder} onSortChange={onSortChange} />
-      }
-      renderItem={({ item }) => (
-        <Pressable onPress={() => onItemPress(item.id)}>
-          <RepositoryItem item={item} />
-        </Pressable>
-      )}
-    />
-  );
-};
+      </View>
+    );
+  };
+
+  render() {
+    const { repositories, onItemPress } = this.props;
+
+    const repositoryNodes = repositories
+      ? repositories.edges.map((edge) => edge.node)
+      : [];
+
+    return (
+      <FlatList
+        data={repositoryNodes}
+        keyExtractor={(item) => item.id}
+        ItemSeparatorComponent={ItemSeparator}
+        ListHeaderComponent={this.renderHeader}
+        renderItem={({ item }) => (
+          <Pressable onPress={() => onItemPress(item.id)}>
+            <RepositoryItem item={item} />
+          </Pressable>
+        )}
+      />
+    );
+  }
+}
 
 const RepositoryList = () => {
   const [sortOrder, setSortOrder] = useState({
@@ -120,9 +143,13 @@ const RepositoryList = () => {
     orderDirection: "DESC",
   });
 
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [debouncedSearchKeyword] = useDebounce(searchKeyword, 500);
+
   const { repositories } = useRepositories({
     orderBy: sortOrder.orderBy,
     orderDirection: sortOrder.orderDirection,
+    searchKeyword: debouncedSearchKeyword,
   });
 
   const navigate = useNavigate();
@@ -135,12 +162,18 @@ const RepositoryList = () => {
     setSortOrder(newSortOrder);
   };
 
+  const onSearchChange = (text) => {
+    setSearchKeyword(text);
+  };
+
   return (
     <RepositoryListContainer
       repositories={repositories}
       onItemPress={onItemPress}
       sortOrder={sortOrder}
       onSortChange={onSortChange}
+      searchKeyword={searchKeyword}
+      onSearchChange={onSearchChange}
     />
   );
 };
