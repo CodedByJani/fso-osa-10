@@ -1,8 +1,8 @@
-import { FlatList, View, StyleSheet, Pressable } from "react-native";
+import { FlatList, View, StyleSheet, Pressable, Alert } from "react-native";
 import { useNavigate } from "react-router-native";
-import { useQuery } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 import { format } from "date-fns";
-import { ME } from "../graphql/queries";
+import { ME, DELETE_REVIEW } from "../graphql/queries";
 import Text from "./Text";
 
 const styles = StyleSheet.create({
@@ -15,6 +15,8 @@ const styles = StyleSheet.create({
   reviewContainer: {
     backgroundColor: "#fff",
     padding: 15,
+  },
+  reviewContentRow: {
     flexDirection: "row",
   },
   ratingContainer: {
@@ -45,6 +47,29 @@ const styles = StyleSheet.create({
   reviewText: {
     marginBottom: 10,
   },
+  actionButtons: {
+    flexDirection: "row",
+    marginTop: 10,
+    gap: 10,
+  },
+  button: {
+    flex: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 5,
+    alignItems: "center",
+  },
+  viewButton: {
+    backgroundColor: "#0366d6",
+  },
+  deleteButton: {
+    backgroundColor: "#d73a49",
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
+  },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
@@ -59,12 +84,31 @@ const styles = StyleSheet.create({
 
 const ItemSeparator = () => <View style={styles.separator} />;
 
-const ReviewItem = ({ review, onRepositoryPress }) => {
+const ReviewItem = ({ review, onRepositoryPress, onDeleteReview }) => {
   const formattedDate = format(new Date(review.createdAt), "dd.MM.yyyy");
 
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete review",
+      "Are you sure you want to delete this review?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => {},
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          onPress: () => onDeleteReview(review.id),
+          style: "destructive",
+        },
+      ],
+    );
+  };
+
   return (
-    <Pressable onPress={() => onRepositoryPress(review.repositoryId)}>
-      <View style={styles.reviewContainer}>
+    <View style={styles.reviewContainer}>
+      <View style={styles.reviewContentRow}>
         <View style={styles.ratingContainer}>
           <Text style={styles.ratingText}>{review.rating}</Text>
         </View>
@@ -76,20 +120,50 @@ const ReviewItem = ({ review, onRepositoryPress }) => {
           <Text style={styles.reviewText}>{review.text}</Text>
         </View>
       </View>
-    </Pressable>
+      <View style={styles.actionButtons}>
+        <Pressable
+          style={[styles.button, styles.viewButton]}
+          onPress={() => onRepositoryPress(review.repositoryId)}
+        >
+          <Text style={styles.buttonText}>View repository</Text>
+        </Pressable>
+        <Pressable
+          style={[styles.button, styles.deleteButton]}
+          onPress={handleDelete}
+        >
+          <Text style={styles.buttonText}>Delete</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 };
 
 const MyReviews = () => {
-  const { data, loading } = useQuery(ME, {
+  const navigate = useNavigate();
+  const { data, loading, refetch } = useQuery(ME, {
     variables: { includeReviews: true },
     fetchPolicy: "cache-and-network",
   });
 
-  const navigate = useNavigate();
+  const [deleteReview] = useMutation(DELETE_REVIEW);
 
   const onRepositoryPress = (repositoryId) => {
     navigate(`/repository/${repositoryId}`);
+  };
+
+  const onDeleteReview = async (reviewId) => {
+    try {
+      await deleteReview({
+        variables: {
+          deleteReviewId: reviewId,
+        },
+      });
+      // Refetch the reviews list after deletion
+      refetch();
+    } catch (e) {
+      console.log(e);
+      Alert.alert("Error", "Failed to delete review");
+    }
   };
 
   if (loading) {
@@ -112,7 +186,11 @@ const MyReviews = () => {
     <FlatList
       data={reviews}
       renderItem={({ item }) => (
-        <ReviewItem review={item} onRepositoryPress={onRepositoryPress} />
+        <ReviewItem
+          review={item}
+          onRepositoryPress={onRepositoryPress}
+          onDeleteReview={onDeleteReview}
+        />
       )}
       keyExtractor={({ id }) => id}
       ItemSeparatorComponent={ItemSeparator}
