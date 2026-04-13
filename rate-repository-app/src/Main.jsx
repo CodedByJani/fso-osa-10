@@ -7,6 +7,7 @@ import SignIn from "./components/SignIn";
 import SignUp from "./components/SignUp";
 import SingleRepository from "./components/SingleRepository";
 import ReviewForm from "./components/ReviewForm";
+import MyReviews from "./components/MyReviews";
 
 const Main = () => {
   return (
@@ -18,6 +19,7 @@ const Main = () => {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/create-review" element={<ReviewForm />} />
+        <Route path="/my-reviews" element={<MyReviews />} />
         <Route path="/repository/:id" element={<SingleRepository />} />
       </Routes>
     </NativeRouter>
