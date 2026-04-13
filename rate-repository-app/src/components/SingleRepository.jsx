@@ -1,4 +1,4 @@
-import { FlatList, View, StyleSheet } from "react-native";
+import { FlatList, View, StyleSheet, Pressable, Linking } from "react-native";
 import { useParams } from "react-router-native";
 import { format } from "date-fns";
 import useRepository from "../hooks/useRepository";
@@ -8,6 +8,22 @@ import Text from "./Text";
 const styles = StyleSheet.create({
   separator: {
     height: 10,
+  },
+  repositoryInfo: {
+    backgroundColor: "#fff",
+    padding: 15,
+    marginBottom: 10,
+  },
+  githubButton: {
+    backgroundColor: "#0366d6",
+    padding: 12,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  githubButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
   reviewContainer: {
     backgroundColor: "#fff",
@@ -44,7 +60,20 @@ const styles = StyleSheet.create({
 const ItemSeparator = () => <View style={styles.separator} />;
 
 const RepositoryInfo = ({ repository }) => {
-  return <RepositoryItem item={repository} showGithubButton />;
+  const handleOpenGitHub = () => {
+    if (repository.url) {
+      Linking.openURL(repository.url);
+    }
+  };
+
+  return (
+    <View style={styles.repositoryInfo}>
+      <RepositoryItem item={repository} />
+      <Pressable style={styles.githubButton} onPress={handleOpenGitHub}>
+        <Text style={styles.githubButtonText}>Open in GitHub</Text>
+      </Pressable>
+    </View>
+  );
 };
 
 const ReviewItem = ({ review }) => {
@@ -66,13 +95,13 @@ const ReviewItem = ({ review }) => {
 
 const SingleRepository = () => {
   const { id } = useParams();
-  const { repository, loading } = useRepository(id);
+  const { repository, loading, fetchMore } = useRepository(id);
 
-  if (loading || !repository) {
+  if (loading && !repository) {
     return null;
   }
 
-  const reviews = repository.reviews.edges.map((edge) => edge.node);
+  const reviews = repository?.reviews?.edges.map((edge) => edge.node) || [];
 
   return (
     <FlatList
@@ -81,6 +110,8 @@ const SingleRepository = () => {
       keyExtractor={({ id }) => id}
       ListHeaderComponent={() => <RepositoryInfo repository={repository} />}
       ItemSeparatorComponent={ItemSeparator}
+      onEndReached={fetchMore}
+      onEndReachedThreshold={0.5}
     />
   );
 };
